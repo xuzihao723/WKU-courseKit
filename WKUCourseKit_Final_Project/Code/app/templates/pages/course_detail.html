@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui with context %}
+
+{% block content %}
+{% if not course %}
+  {{ ui.empty_state(t("course_detail.missing_title"), t("course_detail.missing_body")) }}
+{% else %}
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="{{ nav_url('/courses') }}">{{ t("course_detail.breadcrumb") }}</a>
+  <span>{{ ui.course_code(course) }}</span>
+</nav>
+
+<section class="reader-layout">
+  <aside class="reader-rail" aria-label="Course metadata">
+    <p class="eyebrow">{{ course.term.name }}</p>
+    <h1>{{ ui.course_code(course) }}</h1>
+    <p class="reader-title">{{ course.title }}</p>
+    <dl class="metadata-list">
+      <div>
+        <dt>{{ t("common.instructor") }}</dt>
+        <dd>{{ course.instructor.full_name }}</dd>
+      </div>
+      <div>
+        <dt>{{ t("common.email") }}</dt>
+        <dd>
+          {% if course.instructor.email %}
+            <a href="mailto:{{ course.instructor.email }}">{{ course.instructor.email }}</a>
+          {% else %}
+            {{ t("common.not_listed") }}
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>{{ t("common.office") }}</dt>
+        <dd>{{ course.instructor.office or t("common.not_listed") }}</dd>
+      </div>
+      <div>
+        <dt>{{ "Course time" if lang == "en" else "课程时间" }}</dt>
+        <dd>{{ course_time(course) or t("common.not_listed") }}</dd>
+      </div>
+    </dl>
+    <div class="rail-actions">
+      <button class="button-primary print-button" type="button" onclick="window.print()">{{ t("actions.print_syllabus") }}</button>
+      <a class="button-secondary" href="{{ nav_url('/print?term=' ~ course.term.code) }}">{{ t("actions.term_packet") }}</a>
+      <a class="button-secondary" href="{{ nav_url('/materials?term=' ~ course.term.code ~ '&subject=' ~ course.subject) }}">{{ t("common.materials") }}</a>
+      {% if course.simple_syllabus_url %}
+        <a class="button-secondary" href="{{ course.simple_syllabus_url }}" target="_blank" rel="noopener noreferrer">{{ "Official syllabus" if lang == "en" else "官方大纲" }}</a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <article class="syllabus-reader">
+    <header>
+      <p class="eyebrow">{{ course.syllabus.source_label if course.syllabus else "Syllabus" }}</p>
+      <h2>{{ course.title }}</h2>
+      {% set catalog_description = course_catalog_description(course, lang) %}
+      {% if catalog_description %}
+        <p class="pre-line">{{ catalog_description }}</p>
+      {% else %}
+        <p>{{ "打开课程后正在从 Kean Simple Syllabus 读取详情。" if lang == "zh" else "Course detail is loaded from Kean Simple Syllabus when this page opens." }}</p>
+      {% endif %}
+    </header>
+
+    {% for section in course_detail_sections(course) %}
+      <section class="syllabus-section" id="section-{{ section.id }}">
+        <h3>{{ localized_section_heading(section, lang) }}</h3>
+        <div class="labeled-body">
+          {% for line in localized_labeled_body_lines(section.body, lang) %}
+            {% if line.label %}
+              <p><strong>{{ line.label }}:</strong> {{ line.value }}</p>
+            {% elif line.value %}
+              <p>{{ line.value }}</p>
+            {% else %}
+              <br>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+
+    <section class="syllabus-section" aria-labelledby="course-materials-title">
+      <h3 id="course-materials-title">{{ "Materials" if lang == "en" else "课程材料" }}</h3>
+      {% if course.materials %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+            <th>{{ t("common.title") }}</th>
+            <th>{{ t("common.requirement") }}</th>
+            <th>{{ t("common.isbn") }}</th>
+            <th>{{ t("common.legal_links") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for course_material in course.materials %}
+                {% set material = course_material.material %}
+                {% set links = legal_source_links(material) %}
+                <tr>
+                  <td>
+                    <strong>{{ material.title }}</strong>
+                    <span class="muted-block">{{ material.authors }}</span>
+                  </td>
+                  <td>{{ ui.status_badge(course_material.requirement_status) }}</td>
+                  <td class="mono">{{ material.isbn_13 or material.isbn_10 or t("common.no_isbn") }}</td>
+                  <td>
+                    <div class="link-cluster">
+                      <button
+                        class="button-secondary source-button"
+                        type="button"
+                        data-course-source-url="{{ links.zlib }}"
+                        data-course-source-query="{{ material.isbn_13 or material.isbn_10 or (material.title ~ ' ' ~ material.authors)|trim }}"
+                        onclick="openCourseSource(this)"
+                      >{{ t("common.zlib") }}</button>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p>{{ t("course_detail.materials_empty") }}</p>
+      {% endif %}
+    </section>
+  </article>
+</section>
+{% endif %}
+{% endblock %}

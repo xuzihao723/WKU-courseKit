@@ -1,0 +1,2 @@
+"""WKUCourseKit application package."""
+

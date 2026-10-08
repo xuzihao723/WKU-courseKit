@@ -1,0 +1,39 @@
+{% macro status_badge(value) -%}
+  <span class="badge badge-{{ value|replace('_', '-') }}">{{ ts(value) }}</span>
+{%- endmacro %}
+
+{% macro course_code(course) -%}
+  <span class="mono">{{ course.subject }} {{ course.course_number }}{% if course.section %}-{{ course.section }}{% endif %}</span>
+{%- endmacro %}
+
+{% macro empty_state(title, body) -%}
+  <section class="empty-state" aria-live="polite">
+    <p class="eyebrow">{{ t("common.no_results") }}</p>
+    <h2>{{ title }}</h2>
+    <p>{{ body }}</p>
+  </section>
+{%- endmacro %}
+
+{% macro term_select(terms, selected) -%}
+  <label class="field">
+    <span>{{ t("common.term") }}</span>
+    <select name="term">
+      <option value="">{{ t("common.all_terms") }}</option>
+      {% for term in terms %}
+        <option value="{{ term.code }}" {% if selected == term.code %}selected{% endif %}>{{ term.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+{%- endmacro %}
+
+{% macro subject_select(subjects, selected) -%}
+  <label class="field">
+    <span>{{ t("common.subject") }}</span>
+    <select name="subject">
+      <option value="">{{ t("common.all_subjects") }}</option>
+      {% for subject in subjects %}
+        <option value="{{ subject }}" {% if selected == subject %}selected{% endif %}>{{ subject }}</option>
+      {% endfor %}
+    </select>
+  </label>
+{%- endmacro %}

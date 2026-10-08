@@ -1,0 +1,111 @@
+                           Presentation Speaker Plan
+                                  3 人分工 · 每人约 5 分钟 · 按项目叙事自然切分
+
+
+整体节奏总览
+Speaker                  负责部分                     Slides           Time                   核心任务
+Speaker 1                Problem + Goal +         1-14             5 min                  讲清楚为什么需要这个
+                         Architecture                                                     项目，以及项目整体怎
+                                                                                          么搭起来。
+Speaker 2                Functional               15-24            5 min                  讲主要功能如何在代码
+                         Implementation                                                   和页面中实现，不逐行
+                                                                                          读代码。
+Speaker 3                Live Demo + Results +    25-end           5 min                  按固定路线演示本地应
+                         Discussion + Future                                              用，并总结结果、讨论
+                                                                                          和改进方向。
+
+
+
+分工原则
+- 建议按 3 人各 5 分钟左右分配。
+- 最自然的切法是按项目叙事切：先讲问题和架构，再讲功能实现，最后进行 demo、结果总结和讨论。
+- 每一部分都围绕“用户为什么需要这个系统 - 系统怎么搭 - 功能怎么运行 - 结果如何”展开。
+
+Speaker 1：Problem + Goal + Architecture（约 5 分钟）
+内容                                        建议时间                             讲法重点
+Cover / Plan                              30 秒                             简要介绍汇报结构和三人分工。
+Problem                                   1 分钟                             说明当前课程信息、材料、source links
+                                                                           或打印流程中存在的问题。
+四个 source website 页面                      1 分钟内                            快速展示来源页面，只说明它们提供了哪
+                                                                           些数据或信息，不展开细节。
+Project Goal And Scope                    1 分钟                             说明项目目标、范围，以及系统解决哪些
+                                                                           具体任务。
+Technical Stack + 4 张结构图                  2 分钟                             讲清楚技术栈、数据流、页面路由、
+                                                                           SQLite 与模板之间的关系。
+
+
+核心句：重点讲为什么需要这个项目，以及项目整体怎么搭起来。
+
+Speaker 1 结束衔接：
+“Now that the system structure is clear, the next part explains how the main features are implemented in
+code.”
+
+
+
+
+Speaker 2：Functional Implementation（约 5 分钟）
+这一部分不需要逐行读代码。每个 function 建议用同一个讲法模板：
+
+                                                                                          Presentation Speaker Plan
+- 这个功能解决什么问题。
+- 高亮代码做了什么。
+- 它对应哪个页面功能。
+Function                                                展示重点
+Function 1: App Startup And Routing                     说明应用如何启动，以及不同 route 如何连接到页面。
+Function 2: Dataset Import Into SQLite                  说明数据如何被导入 SQLite，为后续查询和详情页提供基础。
+Function 3: Course Search And Filters                   说明课程搜索和筛选如何帮助用户快速找到目标课程。
+Function 4: Page Routes To Templates                    说明 route 如何渲染对应模板，让页面和后端逻辑连接起来。
+Function 5: Syllabus Reader                             说明 syllabus 阅读功能如何展示课程文件或课程说明。
+Function 6: Materials And Source Links                  说明材料和 source links 如何组织，方便用户追溯来源。
+Function 7: Print Center                                说明 Print Center 如何整合可打印内容，服务最终使用场景。
+
+
+
+Speaker 2 结束衔接：
+“After these implementation pieces, we can now look at the actual local application running inside the
+slides.”
+
+
+
+
+Speaker 3：Live Demo + Results + Discussion + Future（约 5 分钟）
+内容                                       建议时间                              讲法重点
+Demo Checklist                           30 秒                              先说明 demo 会按固定路线进行，避免临
+                                                                           场自由探索。
+Live Demo                                2.5-3 分钟                          展示用户从课程列表进入课程详情，再查
+                                                                           看材料并进入打印中心的完整路径。
+Workflow Outcome / Result Summary        1 分钟                              总结系统最终能帮助用户完成什么任务，
+                                                                           以及输出结果是什么。
+Discussion                               30 秒                              简要讨论实现过程中的取舍、限制或遇到
+                                                                           的问题。
+Future Improvements + Closing / Q&A      1 分钟                              提出后续改进方向，并自然过渡到 Q&A。
+
+
+
+Live demo 固定路线：
+- /courses 搜索或筛选
+- 打开 Course Detail
+- 进入 Materials
+- 进入 Print Center
+不要在 demo 中自由探索，否则容易超时。
+
+Speaker 3 开始 demo：
+“I will now demonstrate the same workflow from the user’s perspective.”
+
+
+
+
+最终排练检查表
+
+                                                                                           Presentation Speaker Plan
+- 每位 speaker 控制在 5 分钟左右，整体约 15 分钟。
+- Speaker 1 负责建立项目背景和系统结构。
+- Speaker 2 负责把功能实现讲清楚，但不要逐行读代码。
+- Speaker 3 负责按固定路线 demo，并完成结果总结、讨论和 future improvements。
+- 换人时使用准备好的英文衔接句，让整体汇报更自然。
+
+
+
+
+                                                            Presentation Speaker Plan
+

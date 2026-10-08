@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="{{ lang }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title if page_title else "WKUCourseKit" }} | WKUCourseKit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}?v=20260513-schedule-contained">
+  </head>
+  <body data-auth-watch="{{ 'true' if auth.running or sync_status in ['started', 'running'] else 'false' }}">
+    <a class="skip-link" href="#content">{{ t("site.skip") }}</a>
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <a href="{{ nav_url('/') }}" class="brand-name">WKUCourseKit</a>
+      </div>
+      <nav class="primary-nav" aria-label="Primary navigation">
+        <a href="{{ nav_url('/courses') }}" class="{{ 'active' if active_path == '/courses' else '' }}">{{ t("nav.courses") }}</a>
+        <a href="{{ nav_url('/catalog') }}" class="{{ 'active' if active_path == '/catalog' else '' }}">{{ t("nav.catalog") }}</a>
+        <a href="{{ nav_url('/library') }}" class="{{ 'active' if active_path == '/library' else '' }}">{{ t("nav.library") }}</a>
+        <a href="{{ nav_url('/materials') }}" class="{{ 'active' if active_path == '/materials' else '' }}">{{ t("nav.materials") }}</a>
+        <a href="{{ nav_url('/print') }}" class="{{ 'active' if active_path == '/print' else '' }}">{{ t("nav.print") }}</a>
+      </nav>
+      <div class="header-actions">
+        {% if auth.signed_in %}
+          <div class="auth-account">
+            <span class="auth-user" title="{{ auth.account_email or auth.account_name or ('Kean signed in' if lang == 'en' else 'Kean 已登录') }}">{{ auth.account_name or auth.account_email or ('Kean signed in' if lang == 'en' else 'Kean 已登录') }}</span>
+            <form method="post" action="/auth/logout" class="nav-auth-form">
+              <input type="hidden" name="next_url" value="{{ current_path }}">
+              <button class="nav-auth-link" type="submit">{{ "Sign Out" if lang == "en" else "退出" }}</button>
+            </form>
+          </div>
+        {% else %}
+          <form method="post" action="/auth/refresh" class="nav-auth-form">
+            <input type="hidden" name="next_url" value="{{ current_path }}">
+            <button class="nav-auth-button" type="submit" {% if auth.running %}disabled{% endif %}>
+              {{ "Syncing" if auth.running and lang == "en" else ("同步中" if auth.running else ("Sign In" if lang == "en" else "登录")) }}
+            </button>
+          </form>
+        {% endif %}
+        <div class="language-switch" aria-label="Language">
+          <a href="{{ switch_lang_url('en') }}" class="{{ 'active' if lang == 'en' else '' }}" hreflang="en">EN</a>
+          <a href="{{ switch_lang_url('zh') }}" class="{{ 'active' if lang == 'zh' else '' }}" hreflang="zh">中文</a>
+        </div>
+      </div>
+    </header>
+    <main id="content" class="page-shell">
+      {% block content %}{% endblock %}
+    </main>
+    <script>
+      (() => {
+        if (document.body.dataset.authWatch !== "true") return;
+        let finished = false;
+        const refreshWithoutSyncFlag = () => {
+          const url = new URL(window.location.href);
+          url.searchParams.delete("sync");
+          window.location.replace(url.toString());
+        };
+        const poll = async () => {
+          if (finished) return;
+          try {
+            const response = await fetch("/auth/status", { cache: "no-store" });
+            if (!response.ok) return;
+            const status = await response.json();
+            if (status.status === "success" && !status.running) {
+              finished = true;
+              refreshWithoutSyncFlag();
+            }
+          } catch {
+            return;
+          }
+        };
+        window.setTimeout(poll, 800);
+        window.setInterval(poll, 2500);
+      })();
+      (() => {
+        const nodes = Array.from(document.querySelectorAll("[data-material-count][data-course-id]"))
+          .filter((node) => node.textContent.trim() === "...");
+        if (!nodes.length) return;
+        const ids = Array.from(new Set(nodes.map((node) => node.dataset.courseId).filter(Boolean)));
+        if (!ids.length) return;
+        const update = async () => {
+          try {
+            const response = await fetch(`/api/material-counts?ids=${encodeURIComponent(ids.join(","))}`, {
+              cache: "no-store"
+            });
+            if (!response.ok) return;
+            const data = await response.json();
+            const counts = data.counts || {};
+            nodes.forEach((node) => {
+              const count = counts[node.dataset.courseId];
+              if (count === undefined || count === null) return;
+              node.textContent = String(count);
+            });
+          } catch {
+            return;
+          }
+        };
+        window.setTimeout(update, 250);
+      })();
+      (() => {
+        const buildCourseSourceSearchUrl = (query) => {
+          const normalized = String(query || "").trim().replace(/\s+/g, " ");
+          if (!normalized) return "https://z-lib.by/";
+          return `https://z-lib.by/s/${encodeURIComponent(normalized)}`;
+        };
+        window.openCourseSource = (node) => {
+          const query = node?.dataset?.courseSourceQuery || "";
+          const url = node?.dataset?.courseSourceUrl || buildCourseSourceSearchUrl(query);
+          if (!url) return;
+          window.open(url, "_blank", "noopener,noreferrer");
+        };
+        window.openAllMaterialSources = () => {
+          const urls = Array.from(document.querySelectorAll("[data-course-source-url]"))
+            .map((node) => node.dataset.courseSourceUrl || buildCourseSourceSearchUrl(node.dataset.courseSourceQuery || ""))
+            .filter(Boolean);
+          Array.from(new Set(urls)).forEach((url, index) => {
+            window.setTimeout(() => window.open(url, "_blank", "noopener,noreferrer"), index * 150);
+          });
+        };
+      })();
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

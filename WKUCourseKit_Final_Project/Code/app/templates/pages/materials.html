@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui with context %}
+
+{% block content %}
+<section class="page-header" aria-labelledby="page-title">
+  <p class="eyebrow">{{ page_eyebrow }}</p>
+  <h1 id="page-title">{{ page_title }}</h1>
+  <p class="lede">{{ t("materials.lede") }}</p>
+</section>
+
+<form class="filter-bar" method="get" action="/materials">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label class="field field-wide">
+    <span>{{ t("actions.search") }}</span>
+    <input name="q" value="{{ filters.q }}" placeholder="{{ t("materials.placeholder") }}">
+  </label>
+  {{ ui.term_select(terms, filters.term) }}
+  {{ ui.subject_select(subjects, filters.subject) }}
+  <label class="field">
+    <span>{{ t("common.requirement") }}</span>
+    <select name="requirement">
+      <option value="">{{ t("common.any") }}</option>
+      {% for value in ["required", "optional"] %}
+        <option value="{{ value }}" {% if filters.requirement == value %}selected{% endif %}>{{ ts(value) }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="button-primary" type="submit">{{ t("actions.apply") }}</button>
+  <a class="button-secondary" href="{{ nav_url('/materials') }}">{{ t("actions.reset") }}</a>
+</form>
+
+<section class="section-panel" aria-labelledby="materials-results">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">{{ rows|length }} {{ "项" if lang == "zh" else "items" }}</p>
+      <h2 id="materials-results">{{ t("print.checklist_title") }}</h2>
+    </div>
+    <div class="section-actions">
+      {% if rows %}
+        <button class="button-secondary source-button" type="button" onclick="openAllMaterialSources()">{{ t("actions.open_all_zlib_searches") }}</button>
+      {% endif %}
+      <a class="text-link" href="{{ nav_url('/print?term=' ~ filters.term) }}">{{ t("actions.print_checklist") }}</a>
+    </div>
+  </div>
+  {% if rows %}
+    <div class="table-wrap">
+      <table class="data-table materials-table">
+        <thead>
+          <tr>
+            <th>{{ t("common.course") }}</th>
+            <th>{{ t("common.material") }}</th>
+            <th>{{ t("common.requirement") }}</th>
+            <th>{{ t("common.isbn") }}</th>
+            <th>{{ t("common.legal_access") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            {% set links = legal_source_links(row.material) %}
+            <tr>
+              <td>{{ ui.course_code(row.course) }}</td>
+              <td>
+                <strong>{{ row.material.title }}</strong>
+                <span class="muted-block">{{ row.material.authors }}{% if row.material.edition %}, {{ row.material.edition }} {{ "版" if lang == "zh" else "edition" }}{% endif %}</span>
+              </td>
+              <td>{{ ui.status_badge(row.course_material.requirement_status) }}</td>
+              <td class="mono">{{ row.material.isbn_13 or row.material.isbn_10 or t("common.no_isbn") }}</td>
+              <td>
+                <div class="link-cluster">
+                  <button
+                    class="button-secondary source-button"
+                    type="button"
+                    data-course-source-url="{{ links.zlib }}"
+                    data-course-source-query="{{ row.material.isbn_13 or row.material.isbn_10 or (row.material.title ~ ' ' ~ row.material.authors)|trim }}"
+                    onclick="openCourseSource(this)"
+                  >{{ t("common.zlib") }}</button>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    {{ ui.empty_state(t("materials.empty_title"), t("materials.empty_body")) }}
+  {% endif %}
+</section>
+{% endblock %}

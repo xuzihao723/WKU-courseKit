@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui with context %}
+
+{% block content %}
+<section class="page-header page-header-with-action" aria-labelledby="page-title">
+  <div>
+    <p class="eyebrow">{{ page_eyebrow }}</p>
+    <h1 id="page-title">{{ page_title }}</h1>
+    <p class="lede">{{ t("library.lede") }}</p>
+  </div>
+  <form method="post" action="/auth/refresh" class="page-refresh-form">
+    <input type="hidden" name="next_url" value="{{ current_path }}">
+    <button class="button-secondary" type="submit" {% if auth.running %}disabled{% endif %}>
+      {{ "Refreshing" if auth.running and lang == "en" else ("刷新中" if auth.running else t("actions.refresh")) }}
+    </button>
+  </form>
+</section>
+
+<form class="filter-bar library-filters" method="get" action="/library">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label class="field field-wide">
+    <span>{{ t("actions.search") }}</span>
+    <input name="q" value="{{ filters.q }}" placeholder="{{ 'CPS、python、policy' if lang == 'en' else 'CPS、python、政策' }}">
+  </label>
+  <label class="field">
+    <span>{{ t("common.course_code") }}</span>
+    <input name="course_code" value="{{ filters.course_code }}" placeholder="{{ t("library.placeholder_code") }}">
+  </label>
+  <label class="field field-wide">
+    <span>{{ t("common.title") }}</span>
+    <input name="title" value="{{ filters.title }}" placeholder="{{ t("library.placeholder_title") }}">
+  </label>
+  <label class="field">
+    <span>{{ t("common.instructor") }}</span>
+    <input name="instructor" value="{{ filters.instructor }}" list="instructors" placeholder="{{ t("library.placeholder_instructor") }}">
+    <datalist id="instructors">
+      {% for instructor in instructors %}
+        <option value="{{ instructor.full_name }}">
+      {% endfor %}
+    </datalist>
+  </label>
+  {{ ui.term_select(terms, filters.term) }}
+  {{ ui.subject_select(subjects, filters.subject) }}
+  <label class="field">
+    <span>{{ t("common.materials") }}</span>
+    <select name="has_materials">
+      <option value="">{{ t("common.any") }}</option>
+      <option value="yes" {% if filters.has_materials == "yes" %}selected{% endif %}>{{ t("filters.has_materials") }}</option>
+      <option value="no" {% if filters.has_materials == "no" %}selected{% endif %}>{{ t("filters.no_materials") }}</option>
+    </select>
+  </label>
+  <label class="field">
+    <span>{{ t("common.sort") }}</span>
+    <select name="sort">
+      <option value="course_code" {% if filters.sort == "course_code" %}selected{% endif %}>{{ t("sort.course_code") }}</option>
+      <option value="title" {% if filters.sort == "title" %}selected{% endif %}>{{ t("common.title") }}</option>
+    </select>
+  </label>
+  <button class="button-primary" type="submit">{{ t("actions.search") }}</button>
+  <a class="button-secondary" href="{{ nav_url('/library') }}">{{ t("actions.reset") }}</a>
+</form>
+
+{% if import_error %}
+  <section class="notice-panel" role="alert">
+    <strong>{{ "Kean lazy load failed" if lang == "en" else "Kean 分页加载失败" }}</strong>
+    <p>{{ import_error }}</p>
+  </section>
+{% endif %}
+
+<section class="result-stack" aria-label="Syllabus results">
+  {% if courses %}
+    {% for course in courses %}
+      <article class="result-row library-result-row">
+        <div class="result-main library-result-main">
+          <p class="eyebrow">{{ course.term.name }}</p>
+          <h2><a href="{{ nav_url('/courses/' ~ course.id) }}">{{ ui.course_code(course) }} · {{ course.title }}</a></h2>
+        </div>
+        <dl class="row-meta library-result-meta">
+          <div>
+            <dt>{{ t("common.instructor") }}</dt>
+            <dd>{{ course.instructor.full_name }}</dd>
+          </div>
+          <div>
+            <dt>{{ "Course time" if lang == "en" else "课程时间" }}</dt>
+            <dd>{{ course_time(course) or t("common.not_loaded") }}</dd>
+          </div>
+        </dl>
+      </article>
+    {% endfor %}
+    {% if pagination.total > 0 %}
+      <nav class="pagination-bar" aria-label="{{ 'Syllabus library pages' if lang == 'en' else '大纲库分页' }}">
+        <p class="pagination-summary">
+          {{ pagination.start }}-{{ pagination.end }} / {{ pagination.total }} {{ t("common.results") }}
+        </p>
+        {% if pagination.total_pages > 1 %}
+          <div class="pagination-controls">
+            {% if pagination.has_previous %}
+              <a class="page-link page-link-wide" href="{{ pagination.previous_url }}">{{ t("pagination.previous") }}</a>
+            {% else %}
+              <span class="page-link page-link-wide is-disabled">{{ t("pagination.previous") }}</span>
+            {% endif %}
+
+            {% for item in pagination.pages %}
+              {% if item.type == "ellipsis" %}
+                <span class="page-ellipsis" aria-hidden="true">...</span>
+              {% elif item.current %}
+                <span class="page-link is-current" aria-current="page">{{ item.number }}</span>
+              {% else %}
+                <a class="page-link" href="{{ item.url }}">{{ item.number }}</a>
+              {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+              <a class="page-link page-link-wide" href="{{ pagination.next_url }}">{{ t("pagination.next") }}</a>
+            {% else %}
+              <span class="page-link page-link-wide is-disabled">{{ t("pagination.next") }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    {{ ui.empty_state(t("library.empty_title"), t("library.empty_body")) }}
+  {% endif %}
+</section>
+{% endblock %}

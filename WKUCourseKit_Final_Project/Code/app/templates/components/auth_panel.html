@@ -1,0 +1,49 @@
+<section class="auth-panel" aria-label="{{ 'Kean Simple Syllabus access' if lang == 'en' else 'Kean Simple Syllabus 访问' }}">
+  <div>
+    <p class="eyebrow">{{ "Kean access" if lang == "en" else "Kean 访问" }}</p>
+    <h2>{{ "Login, crawl, render" if lang == "en" else "登录、抓取并渲染" }}</h2>
+    <p>
+      {{ "WKUCourseKit opens a controlled browser session, waits for your Kean login, captures authorized Simple Syllabus JSON, and writes the results into this site."
+         if lang == "en"
+         else "WKUCourseKit 会打开可观察的浏览器会话，等待你完成 Kean 登录，抓取已授权的 Simple Syllabus JSON，并写入本站渲染。" }}
+    </p>
+    {% if auth.message %}
+      <p class="auth-message">{{ auth.message }}</p>
+    {% endif %}
+    {% if sync_status == "success" %}
+      <p class="auth-feedback auth-feedback-success">{{ "Sync complete. The rendered data below is refreshed." if lang == "en" else "同步完成。下方渲染数据已刷新。" }}</p>
+    {% elif sync_status in ["started", "running"] or auth.running %}
+      <p class="auth-feedback auth-feedback-success">{{ "Sync is running in the background. Refresh this page to see newly imported batches." if lang == "en" else "同步正在后台运行。刷新本页即可看到已导入的批次。" }}</p>
+    {% elif sync_status == "failed" %}
+      <p class="auth-feedback auth-feedback-error">{{ "Sync failed. Keep the browser window open after login, then run it again." if lang == "en" else "同步失败。登录后请保持浏览器窗口打开，然后再次运行。" }}</p>
+    {% endif %}
+  </div>
+  <div class="auth-actions">
+    <dl class="auth-status-list">
+      <div>
+        <dt>{{ "Status" if lang == "en" else "状态" }}</dt>
+        <dd>{{ auth.status }}</dd>
+      </div>
+      <div>
+        <dt>{{ "Last update" if lang == "en" else "最近更新" }}</dt>
+        <dd>{{ auth.updated_at or ("Not refreshed" if lang == "en" else "尚未刷新") }}</dd>
+      </div>
+      {% if auth.course_count is defined %}
+        <div>
+          <dt>{{ "Courses" if lang == "en" else "课程" }}</dt>
+          <dd class="mono">{{ auth.course_count }}</dd>
+        </div>
+      {% endif %}
+    </dl>
+    <form method="post" action="/auth/refresh" class="auth-sync-form">
+      <input type="hidden" name="next_url" value="{{ current_path }}">
+      <button class="button-primary" type="submit" {% if auth.running %}disabled{% endif %}>
+        {{ "Sync running" if auth.running and lang == "en" else ("正在同步" if auth.running else ("Login and sync" if lang == "en" else "登录并同步")) }}
+      </button>
+    </form>
+    <div class="auth-link-row">
+      <a class="button-secondary" href="{{ official_links.my_courses }}" target="_blank" rel="noopener noreferrer">{{ t("actions.open_kean_my_courses") }}</a>
+      <a class="button-secondary" href="{{ official_links.library }}" target="_blank" rel="noopener noreferrer">{{ t("actions.open_kean_library") }}</a>
+    </div>
+  </div>
+</section>

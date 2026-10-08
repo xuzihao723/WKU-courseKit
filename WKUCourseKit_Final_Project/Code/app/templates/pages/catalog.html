@@ -1,0 +1,609 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui with context %}
+
+{% block content %}
+<section class="page-header catalog-header page-header-with-action" aria-labelledby="page-title">
+  <div>
+    <p class="eyebrow">{{ page_eyebrow }}</p>
+    <h1 id="page-title">{{ page_title }}</h1>
+    <p class="lede">{{ t("catalog.lede") }}</p>
+    <div class="page-header-actions">
+      <a class="button-secondary" href="{{ current_path }}">{{ t("actions.refresh") }}</a>
+    </div>
+  </div>
+  <dl class="catalog-source-note">
+    <div>
+      <dt>{{ t("common.term") }}</dt>
+      <dd>{{ catalog_term }}</dd>
+    </div>
+    <div>
+      <dt>{{ t("catalog.location") }}</dt>
+      <dd>{{ catalog_location }}</dd>
+    </div>
+    <div>
+      <dt>{{ t("catalog.source") }}</dt>
+      <dd><a class="text-link" href="{{ catalog.source_url if catalog else 'https://kean-ss.colleague.elluciancloud.com/Student/Student/Courses/Search?searchResultsView=SectionListing&terms=2026FAW' }}" target="_blank" rel="noreferrer">{{ t("catalog.official_link") }}</a></dd>
+    </div>
+  </dl>
+</section>
+
+<form class="filter-bar catalog-filters" method="get" action="/catalog">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label class="field field-wide">
+    <span>{{ t("actions.search") }}</span>
+    <input name="q" value="{{ filters.q }}" placeholder="{{ 'keyword, title, course' if lang == 'en' else '关键词、标题、课程' }}">
+  </label>
+  <label class="field">
+    <span>{{ t("common.subject") }}</span>
+    <select name="subject">
+      <option value="">{{ t("common.all_subjects") }}</option>
+      {% for subject in subjects %}
+        <option value="{{ subject.value }}" {% if filters.subject == subject.value %}selected{% endif %}>
+          {{ subject.value }} · {{ subject.label }}{% if subject.count is not none %} ({{ subject.count }}){% endif %}
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="field">
+    <span>{{ t("catalog.course_number") }}</span>
+    <input name="course_number" value="{{ filters.course_number }}" placeholder="2232">
+  </label>
+  <label class="field">
+    <span>{{ t("catalog.section") }}</span>
+    <input name="section" value="{{ filters.section }}" placeholder="W01">
+  </label>
+  <label class="field field-wide">
+    <span>{{ t("common.instructor") }}</span>
+    <select name="instructor">
+      <option value="">{{ t("catalog.all_instructors") }}</option>
+      {% for person in faculty %}
+        <option value="{{ person.value }}" {% if filters.instructor == person.value %}selected{% endif %}>
+          {{ person.label }}{% if person.count is not none %} ({{ person.count }}){% endif %}
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="field">
+    <span>{{ t("catalog.availability") }}</span>
+    <select name="open_only">
+      <option value="">{{ t("common.any") }}</option>
+      <option value="yes" {% if filters.open_only == "yes" %}selected{% endif %}>{{ t("catalog.open_only") }}</option>
+    </select>
+  </label>
+  <button class="button-primary" type="submit">{{ t("actions.search") }}</button>
+  <a class="button-secondary" href="{{ nav_url('/catalog') }}">{{ t("actions.reset") }}</a>
+</form>
+
+{% if import_error %}
+  <section class="notice-panel" role="alert">
+    <strong>{{ t("catalog.error_title") }}</strong>
+    <p>{{ import_error }}</p>
+  </section>
+{% endif %}
+
+{% if catalog and catalog.stale %}
+  <section class="notice-panel notice-panel-soft" role="status">
+    <strong>{{ t("catalog.cached_title") }}</strong>
+    <p>{{ t("catalog.cached_body") }}</p>
+  </section>
+{% endif %}
+
+<section class="schedule-planner" aria-labelledby="schedule-title">
+  <div class="planning-shell-bar">
+    <div>
+      <p class="eyebrow">{{ "Student Planning" if lang == "en" else "学生规划" }}</p>
+      <h2 id="schedule-title">{{ "Plan and Schedule" if lang == "en" else "计划与课表" }}</h2>
+    </div>
+    <div class="planning-actions" aria-label="{{ 'Planning actions' if lang == 'en' else '规划操作' }}">
+      <button class="button-secondary planning-icon-button" type="button" aria-label="{{ 'Previous term' if lang == 'en' else '上一学期' }}">‹</button>
+      <strong>{{ catalog_term }}</strong>
+      <button class="button-secondary planning-icon-button" type="button" aria-label="{{ 'Next term' if lang == 'en' else '下一学期' }}">›</button>
+      <button class="button-secondary" id="schedule-print-button" type="button">{{ "Print" if lang == "en" else "打印" }}</button>
+      <button class="button-secondary" id="schedule-ical-button" type="button">{{ "Save to iCal" if lang == "en" else "保存为 iCal" }}</button>
+    </div>
+  </div>
+  <nav class="planning-tabs" aria-label="{{ 'Student Planning tabs' if lang == 'en' else '学生规划标签' }}">
+    <span class="active">{{ "Schedule" if lang == "en" else "课表" }}</span>
+    <span>{{ "Timeline" if lang == "en" else "时间线" }}</span>
+    <span>{{ "Advising" if lang == "en" else "导师建议" }}</span>
+    <span>{{ "Petitions & Waivers" if lang == "en" else "申请与豁免" }}</span>
+  </nav>
+  <div class="schedule-toolbar">
+    <p>{{ "This mock view follows KeanWISE Student Planning: planned sections appear in the left list and in the weekly calendar grid." if lang == "en" else "此模拟视图按照 KeanWISE Student Planning：已计划课程会同时显示在左侧列表和右侧周课表网格中。" }}</p>
+    <div class="schedule-controls">
+      <label class="field">
+        <span>{{ "Active schedule" if lang == "en" else "当前课表" }}</span>
+        <select id="schedule-select" aria-label="{{ 'Active schedule' if lang == 'en' else '当前课表' }}"></select>
+      </label>
+      <label class="field">
+        <span>{{ "New schedule" if lang == "en" else "新建课表" }}</span>
+        <input id="schedule-name-input" placeholder="{{ 'Spring plan A' if lang == 'en' else '春季方案 A' }}">
+      </label>
+      <button class="button-secondary" id="create-schedule-button" type="button">{{ "Create" if lang == "en" else "新建" }}</button>
+    </div>
+  </div>
+  <div class="planning-layout">
+    <aside class="planned-sections-panel" aria-labelledby="planned-sections-title">
+      <div class="planned-sections-head">
+        <h3 id="planned-sections-title">{{ "Planned Sections" if lang == "en" else "已计划班级" }}</h3>
+        <span id="planned-sections-count">0</span>
+      </div>
+      <div class="planned-sections-list" id="planned-sections-list"></div>
+    </aside>
+    <div class="schedule-week-wrap">
+      <div class="schedule-week" id="schedule-week" aria-live="polite">
+        <div class="schedule-time-rail" aria-hidden="true"></div>
+        <div class="schedule-day" data-day="Monday"></div>
+        <div class="schedule-day" data-day="Tuesday"></div>
+        <div class="schedule-day" data-day="Wednesday"></div>
+        <div class="schedule-day" data-day="Thursday"></div>
+        <div class="schedule-day" data-day="Friday"></div>
+      </div>
+    </div>
+  </div>
+  <p class="schedule-empty" id="schedule-empty">{{ "No sections in this schedule yet." if lang == "en" else "当前课表还没有课程。" }}</p>
+</section>
+
+<section class="catalog-results" aria-label="{{ t("nav.catalog") }}">
+  {% if sections %}
+    <div class="catalog-result-summary">
+      <p>
+        {{ pagination.start }}-{{ pagination.end }} / {{ pagination.total }} {{ t("common.results") }}
+      </p>
+      {% if catalog %}
+        <span>{{ t("catalog.updated") }} {{ catalog.fetched_at[:10] }}</span>
+      {% endif %}
+    </div>
+    <div class="table-wrap catalog-table-wrap">
+      <table class="data-table catalog-table">
+        <thead>
+          <tr>
+            <th>{{ t("common.course") }}</th>
+            <th>{{ t("common.title") }}</th>
+            <th>{{ t("catalog.meeting") }}</th>
+            <th>{{ t("common.instructor") }}</th>
+            <th>{{ t("catalog.seats") }}</th>
+            <th>{{ t("catalog.details") }}</th>
+            <th>{{ "Schedule" if lang == "en" else "课表" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for section in sections %}
+            <tr data-catalog-section="{{ {
+              'id': section.id,
+              'code': section.code,
+              'title': course_title(section.title),
+              'term': section.term,
+              'location': section.location,
+              'dates': section.dates,
+              'credits': section.credits,
+              'instructors': section.instructors,
+              'meetings': section.meetings
+            }|tojson|forceescape }}">
+              <td>
+                <strong class="mono">{{ section.code }}</strong>
+                <span class="muted-block">{{ section.term }}</span>
+              </td>
+              <td>
+                <strong>{{ course_title(section.title) }}</strong>
+                <span class="muted-block">{{ section.location }}</span>
+                {% if section.comments %}
+                  <span class="muted-block">{{ section.comments }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if section.meetings %}
+                  {% for meeting in section.meetings %}
+                    <span class="catalog-meeting">{{ meeting }}</span>
+                  {% endfor %}
+                {% else %}
+                  {{ t("common.not_listed") }}
+                {% endif %}
+                {% if section.dates %}
+                  <span class="muted-block">{{ section.dates }}</span>
+                {% endif %}
+              </td>
+              <td>{{ section.instructors or t("common.not_listed") }}</td>
+              <td>
+                <span class="badge badge-{{ 'reviewed' if section.availability_status == 'Open' else 'needed' }}">{{ section.availability_status or t("common.not_listed") }}</span>
+                <span class="muted-block">{{ section.availability or t("common.not_listed") }}</span>
+              </td>
+              <td>
+                {{ section.credits or t("common.not_listed") }}
+              </td>
+              <td>
+                <div class="catalog-schedule-action">
+                  <select class="catalog-row-schedule-select" aria-label="{{ 'Target schedule' if lang == 'en' else '目标课表' }}"></select>
+                  <button class="button-secondary catalog-add-button" type="button">{{ "Add" if lang == "en" else "加入" }}</button>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if pagination.total > 0 %}
+      <nav class="pagination-bar" aria-label="{{ 'Course catalog pages' if lang == 'en' else '课程目录分页' }}">
+        <p class="pagination-summary">
+          {{ pagination.start }}-{{ pagination.end }} / {{ pagination.total }} {{ t("common.results") }}
+        </p>
+        {% if pagination.total_pages > 1 %}
+          <div class="pagination-controls">
+            {% if pagination.has_previous %}
+              <a class="page-link page-link-wide" href="{{ pagination.previous_url }}">{{ t("pagination.previous") }}</a>
+            {% else %}
+              <span class="page-link page-link-wide is-disabled">{{ t("pagination.previous") }}</span>
+            {% endif %}
+            {% for item in pagination.pages %}
+              {% if item.type == "ellipsis" %}
+                <span class="page-ellipsis" aria-hidden="true">...</span>
+              {% elif item.current %}
+                <span class="page-link is-current" aria-current="page">{{ item.number }}</span>
+              {% else %}
+                <a class="page-link" href="{{ item.url }}">{{ item.number }}</a>
+              {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+              <a class="page-link page-link-wide" href="{{ pagination.next_url }}">{{ t("pagination.next") }}</a>
+            {% else %}
+              <span class="page-link page-link-wide is-disabled">{{ t("pagination.next") }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    {{ ui.empty_state(t("catalog.empty_title"), t("catalog.empty_body")) }}
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const root = document.querySelector(".schedule-planner");
+    if (!root) return;
+
+    const labels = {
+      untitled: {{ ("Untitled schedule" if lang == "en" else "未命名课表")|tojson }},
+      defaultName: {{ ("Primary schedule" if lang == "en" else "默认课表")|tojson }},
+      add: {{ ("Add" if lang == "en" else "加入")|tojson }},
+      added: {{ ("Added" if lang == "en" else "已加入")|tojson }},
+      noMeeting: {{ ("This section has no weekly meeting time to place on the calendar." if lang == "en" else "这个班级没有可放入周历的上课时间。")|tojson }},
+      duplicate: {{ ("This section is already in that schedule." if lang == "en" else "这个班级已经在该课表中。")|tojson }},
+      remove: {{ ("Remove" if lang == "en" else "删除")|tojson }},
+      planned: {{ ("Planned" if lang == "en" else "已计划")|tojson }},
+      noSections: {{ ("No planned sections yet." if lang == "en" else "还没有已计划班级。")|tojson }},
+      saved: {{ ("Saved" if lang == "en" else "已保存")|tojson }},
+      days: {
+        Monday: {{ ("Mon" if lang == "en" else "周一")|tojson }},
+        Tuesday: {{ ("Tue" if lang == "en" else "周二")|tojson }},
+        Wednesday: {{ ("Wed" if lang == "en" else "周三")|tojson }},
+        Thursday: {{ ("Thu" if lang == "en" else "周四")|tojson }},
+        Friday: {{ ("Fri" if lang == "en" else "周五")|tojson }}
+      }
+    };
+    const storageKey = "wkucoursekit.catalogSchedules.v1";
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const scheduleSelect = document.getElementById("schedule-select");
+    const scheduleNameInput = document.getElementById("schedule-name-input");
+    const createButton = document.getElementById("create-schedule-button");
+    const week = document.getElementById("schedule-week");
+    const empty = document.getElementById("schedule-empty");
+    const plannedList = document.getElementById("planned-sections-list");
+    const plannedCount = document.getElementById("planned-sections-count");
+    const printButton = document.getElementById("schedule-print-button");
+    const icalButton = document.getElementById("schedule-ical-button");
+    const dayColumns = new Map(days.map((day) => [day, week.querySelector(`[data-day="${day}"]`)]));
+    const rowSelects = Array.from(document.querySelectorAll(".catalog-row-schedule-select"));
+    const addButtons = Array.from(document.querySelectorAll(".catalog-add-button"));
+    const catalogSections = new Map(Array.from(document.querySelectorAll("[data-catalog-section]")).map((row) => {
+      try {
+        const section = JSON.parse(row.dataset.catalogSection);
+        return [section.id, section];
+      } catch {
+        return [null, null];
+      }
+    }).filter(([sectionId, section]) => sectionId && section));
+    const startHour = 7;
+    const endHour = 20;
+    const hourHeight = 64;
+
+    const uid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    const defaultState = () => {
+      const id = uid();
+      return { activeId: id, schedules: [{ id, name: labels.defaultName, events: [] }] };
+    };
+    const loadState = () => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(storageKey) || "");
+        if (parsed?.schedules?.length) return parsed;
+      } catch {
+        return defaultState();
+      }
+      return defaultState();
+    };
+    const saveState = () => localStorage.setItem(storageKey, JSON.stringify(state));
+    let state = loadState();
+
+    const parseTime = (value, meridiem) => {
+      const parts = value.split(":").map(Number);
+      let hour = parts[0] || 0;
+      const minute = parts[1] || 0;
+      if (meridiem === "PM" && hour !== 12) hour += 12;
+      if (meridiem === "AM" && hour === 12) hour = 0;
+      return hour * 60 + minute;
+    };
+    const meetingKind = (meeting) => {
+      const match = String(meeting).match(/\(([^)]+)\)\s*$/);
+      return match ? match[1] : "";
+    };
+    const parseMeetings = (section) => {
+      const dayNames = {
+        Monday: "Monday",
+        Tuesday: "Tuesday",
+        Wednesday: "Wednesday",
+        Thursday: "Thursday",
+        Friday: "Friday"
+      };
+      const slots = [];
+      (section.meetings || []).forEach((meeting) => {
+        const meetingText = String(meeting);
+        const firstTime = meetingText.search(/\d{1,2}:\d{2}\s*(?:AM|PM)/i);
+        if (firstTime < 0) return;
+        const dayText = meetingText.slice(0, firstTime);
+        const ranges = Array.from(meetingText.matchAll(/(\d{1,2}:\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}:\d{2})\s*(AM|PM)/gi));
+        if (!ranges.length) return;
+        const kind = meetingKind(meetingText);
+        const selectedRanges = kind.toLowerCase().includes("laboratory") && ranges.length > 1
+          ? [ranges[ranges.length - 1]]
+          : ranges;
+        Object.keys(dayNames).forEach((day) => {
+          if (!dayText.includes(day)) return;
+          selectedRanges.forEach((match) => {
+            const start = parseTime(match[1], match[2].toUpperCase());
+            const end = parseTime(match[3], match[4].toUpperCase());
+            if (end > start) slots.push({ day, start, end, kind });
+          });
+        });
+      });
+      return slots;
+    };
+    const minutesLabel = (minutes) => {
+      const hour24 = Math.floor(minutes / 60);
+      const minute = String(minutes % 60).padStart(2, "0");
+      const suffix = hour24 >= 12 ? "PM" : "AM";
+      const hour12 = hour24 % 12 || 12;
+      return `${hour12}:${minute} ${suffix}`;
+    };
+    const hourLabel = (hour24) => {
+      const suffix = hour24 >= 12 ? "pm" : "am";
+      const hour12 = hour24 % 12 || 12;
+      return `${hour12}${suffix}`;
+    };
+    const eventColor = (eventId) => {
+      return "event-planned";
+    };
+    const removeEvent = (eventId) => {
+      const schedule = activeSchedule();
+      schedule.events = (schedule.events || []).filter((item) => item.id !== eventId);
+      render();
+    };
+    const activeSchedule = () => state.schedules.find((schedule) => schedule.id === state.activeId) || state.schedules[0];
+    const renderSelectors = () => {
+      const options = state.schedules.map((schedule) => `<option value="${schedule.id}">${schedule.name}</option>`).join("");
+      scheduleSelect.innerHTML = options;
+      scheduleSelect.value = activeSchedule().id;
+      rowSelects.forEach((select) => {
+        const previous = select.value || activeSchedule().id;
+        select.innerHTML = options;
+        select.value = state.schedules.some((schedule) => schedule.id === previous) ? previous : activeSchedule().id;
+      });
+    };
+    const refreshStoredSlotsFromCatalog = () => {
+      state.schedules.forEach((schedule) => {
+        (schedule.events || []).forEach((event) => {
+          const section = catalogSections.get(event.sectionId);
+          if (!section) return;
+          const slots = parseMeetings(section);
+          if (!slots.length) return;
+          event.title = section.title || event.title;
+          event.slots = slots;
+          event.meetings = section.meetings || event.meetings || [];
+        });
+      });
+    };
+    const renderCalendarScaffold = () => {
+      const hourRows = Array.from({ length: endHour - startHour }, (_, index) => startHour + index);
+      week.querySelector(".schedule-time-rail").innerHTML = [
+        '<div class="schedule-time-head"></div>',
+        `<div class="schedule-time-body">${hourRows.map((hour) => `<span>${hourLabel(hour)}</span>`).join("")}</div>`
+      ].join("");
+      days.forEach((day) => {
+        const column = dayColumns.get(day);
+        column.innerHTML = [
+          `<div class="schedule-day-head"><strong>${labels.days[day]}</strong></div>`,
+          `<div class="schedule-day-body">${hourRows.map(() => '<span class="schedule-hour-line"></span>').join("")}</div>`
+        ].join("");
+      });
+    };
+    const renderPlannedSections = () => {
+      const schedule = activeSchedule();
+      const events = schedule.events || [];
+      plannedCount.textContent = String(events.length);
+      plannedList.innerHTML = "";
+      if (!events.length) {
+        const item = document.createElement("p");
+        item.className = "planned-section-empty";
+        item.textContent = labels.noSections;
+        plannedList.appendChild(item);
+        return;
+      }
+      events.forEach((event) => {
+        const card = document.createElement("article");
+        card.className = "planned-section-card";
+        const header = document.createElement("div");
+        const code = document.createElement("strong");
+        code.textContent = event.code;
+        const status = document.createElement("span");
+        status.textContent = labels.planned;
+        header.append(code, status);
+        const title = document.createElement("p");
+        title.textContent = event.title;
+        const meta = document.createElement("small");
+        const firstSlot = (event.slots || [])[0];
+        meta.textContent = [
+          firstSlot ? `${firstSlot.day} ${minutesLabel(firstSlot.start)}-${minutesLabel(firstSlot.end)}` : "",
+          event.instructors || ""
+        ].filter(Boolean).join(" | ");
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "planned-section-remove";
+        remove.dataset.eventId = event.id;
+        remove.textContent = labels.remove;
+        card.append(header, title, meta, remove);
+        plannedList.appendChild(card);
+      });
+    };
+    const renderEvents = () => {
+      const schedule = activeSchedule();
+      const events = schedule.events || [];
+      days.forEach((day) => {
+        const body = dayColumns.get(day).querySelector(".schedule-day-body");
+        events.forEach((event) => {
+          (event.slots || []).filter((slot) => slot.day === day).forEach((slot) => {
+            const top = ((slot.start - startHour * 60) / 60) * hourHeight;
+            const height = Math.max(36, ((slot.end - slot.start) / 60) * hourHeight);
+            const maxHeight = (endHour - startHour) * hourHeight - Math.max(0, top);
+            const item = document.createElement("article");
+            item.className = `schedule-event ${eventColor(event.id)}`;
+            item.style.top = `${Math.max(0, top)}px`;
+            item.style.height = `${Math.min(maxHeight, height)}px`;
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "schedule-event-remove";
+            remove.setAttribute("aria-label", labels.remove);
+            remove.dataset.eventId = event.id;
+            remove.textContent = "x";
+            const code = document.createElement("strong");
+            code.textContent = event.code;
+            const title = document.createElement("span");
+            title.textContent = event.title;
+            const detail = document.createElement("em");
+            detail.textContent = event.instructors || "";
+            const time = document.createElement("small");
+            time.textContent = `${minutesLabel(slot.start)}-${minutesLabel(slot.end)}`;
+            item.append(remove, code, title, detail, time);
+            body.appendChild(item);
+          });
+        });
+      });
+      empty.hidden = events.length > 0;
+    };
+    const render = () => {
+      if (!state.schedules.length) state = defaultState();
+      if (!activeSchedule()) state.activeId = state.schedules[0].id;
+      refreshStoredSlotsFromCatalog();
+      renderSelectors();
+      renderCalendarScaffold();
+      renderPlannedSections();
+      renderEvents();
+      saveState();
+    };
+    const getRowSection = (button) => {
+      const row = button.closest("[data-catalog-section]");
+      if (!row) return null;
+      try {
+        return JSON.parse(row.dataset.catalogSection);
+      } catch {
+        return null;
+      }
+    };
+    createButton.addEventListener("click", () => {
+      const name = scheduleNameInput.value.trim() || labels.untitled;
+      const schedule = { id: uid(), name, events: [] };
+      state.schedules.push(schedule);
+      state.activeId = schedule.id;
+      scheduleNameInput.value = "";
+      render();
+    });
+    scheduleSelect.addEventListener("change", () => {
+      state.activeId = scheduleSelect.value;
+      render();
+    });
+    addButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const section = getRowSection(button);
+        const targetId = button.parentElement.querySelector("select").value || activeSchedule().id;
+        const target = state.schedules.find((schedule) => schedule.id === targetId);
+        if (!section || !target) return;
+        const slots = parseMeetings(section);
+        if (!slots.length) {
+          window.alert(labels.noMeeting);
+          return;
+        }
+        if ((target.events || []).some((event) => event.sectionId === section.id)) {
+          window.alert(labels.duplicate);
+          return;
+        }
+        target.events.push({
+          id: uid(),
+          sectionId: section.id,
+          code: section.code,
+          title: section.title,
+          instructors: section.instructors,
+          credits: section.credits,
+          location: section.location,
+          meetings: section.meetings,
+          slots
+        });
+        state.activeId = target.id;
+        button.textContent = labels.added;
+        window.setTimeout(() => { button.textContent = labels.add; }, 900);
+        render();
+      });
+    });
+    week.addEventListener("click", (event) => {
+      const remove = event.target.closest(".schedule-event-remove");
+      if (!remove) return;
+      removeEvent(remove.dataset.eventId);
+    });
+    plannedList.addEventListener("click", (event) => {
+      const remove = event.target.closest(".planned-section-remove");
+      if (!remove) return;
+      removeEvent(remove.dataset.eventId);
+    });
+    const printSchedule = () => {
+      document.body.classList.add("printing-schedule");
+      const cleanup = () => document.body.classList.remove("printing-schedule");
+      window.addEventListener("afterprint", cleanup, { once: true });
+      window.print();
+      window.setTimeout(cleanup, 1000);
+    };
+    printButton.addEventListener("click", printSchedule);
+    icalButton.addEventListener("click", () => {
+      const schedule = activeSchedule();
+      const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//WKUCourseKit//Student Planning Mock//EN"];
+      (schedule.events || []).forEach((event) => {
+        (event.slots || []).forEach((slot) => {
+          lines.push("BEGIN:VEVENT");
+          lines.push(`SUMMARY:${event.code} ${event.title}`.replace(/\n/g, " "));
+          lines.push(`DESCRIPTION:${[event.instructors, event.location].filter(Boolean).join(" | ")}`.replace(/\n/g, " "));
+          lines.push(`LOCATION:${event.location || ""}`.replace(/\n/g, " "));
+          lines.push(`X-WKUCOURSEKIT-DAY:${slot.day}`);
+          lines.push(`X-WKUCOURSEKIT-TIME:${minutesLabel(slot.start)}-${minutesLabel(slot.end)}`);
+          lines.push("END:VEVENT");
+        });
+      });
+      lines.push("END:VCALENDAR");
+      const blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${schedule.name || "schedule"}.ics`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+    render();
+  })();
+</script>
+{% endblock %}

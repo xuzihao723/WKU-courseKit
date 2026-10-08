@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui with context %}
+
+{% block content %}
+<section class="page-header page-header-with-action" aria-labelledby="page-title">
+  <div>
+    <p class="eyebrow">{{ page_eyebrow }}</p>
+    <h1 id="page-title">{{ page_title }}</h1>
+    <p class="lede">{{ "查找已选课程，查看课程材料，并打开可打印的课程材料包。" if lang == "zh" else "Find enrolled courses, review materials, and open print-ready course packets." }}</p>
+  </div>
+  <form method="post" action="/auth/refresh" class="page-refresh-form">
+    <input type="hidden" name="next_url" value="{{ current_path }}">
+    <button class="button-secondary" type="submit" {% if auth.running %}disabled{% endif %}>
+      {{ "Refreshing" if auth.running and lang == "en" else ("刷新中" if auth.running else t("actions.refresh")) }}
+    </button>
+  </form>
+</section>
+
+<form class="filter-bar" method="get" action="/courses">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label class="field field-wide">
+    <span>{{ t("actions.search") }}</span>
+    <input name="q" value="{{ filters.q }}" placeholder="{{ 'CPS 3320、写作、教师' if lang == 'zh' else 'CPS 3320, writing, instructor' }}">
+  </label>
+  {{ ui.term_select(terms, filters.term) }}
+  {{ ui.subject_select(subjects, filters.subject) }}
+  <label class="field">
+    <span>{{ t("common.materials") }}</span>
+    <select name="has_materials">
+      <option value="">{{ t("common.any") }}</option>
+      <option value="yes" {% if filters.has_materials == "yes" %}selected{% endif %}>{{ t("filters.has_materials") }}</option>
+      <option value="no" {% if filters.has_materials == "no" %}selected{% endif %}>{{ t("filters.no_materials") }}</option>
+    </select>
+  </label>
+  <label class="field">
+    <span>{{ t("common.sort") }}</span>
+    <select name="sort">
+      <option value="course_code" {% if filters.sort == "course_code" %}selected{% endif %}>{{ t("sort.course_code") }}</option>
+      <option value="title" {% if filters.sort == "title" %}selected{% endif %}>{{ t("common.title") }}</option>
+    </select>
+  </label>
+  <button class="button-primary" type="submit">{{ t("actions.apply") }}</button>
+  <a class="button-secondary" href="{{ nav_url('/courses') }}">{{ t("actions.reset") }}</a>
+</form>
+
+<section class="section-panel" aria-labelledby="course-results">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">{{ course_groups|length }} {{ t("common.results") }}{% if course_groups|length != courses|length %} · {{ courses|length }} {{ "sections" if lang == "en" else "个班级" }}{% endif %}</p>
+      <h2 id="course-results">{{ "课程列表" if lang == "zh" else "Course list" }}</h2>
+    </div>
+    <a class="text-link" href="{{ nav_url('/print?term=' ~ filters.term) }}">{{ t("actions.print_selection") }}</a>
+  </div>
+  {% if courses %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ t("common.course") }}</th>
+            <th>{{ t("common.title") }}</th>
+            <th>{{ t("common.instructor") }}</th>
+            <th>{{ t("common.term") }}</th>
+            <th>{{ t("common.materials") }}</th>
+            <th>{{ t("common.action") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for group in course_groups %}
+            {% set course = group.primary %}
+            <tr>
+              <td>{{ ui.course_code(course) }}</td>
+              <td><a href="{{ nav_url('/courses/' ~ course.id) }}">{{ course.title }}</a></td>
+              <td>{{ course.instructor.full_name }}</td>
+              <td>{{ course.term.name }}</td>
+              {% set material_count = course.materials|length if course.materials|length else course.material_count_hint %}
+              <td class="mono" data-material-count data-course-id="{{ course.id }}" aria-live="polite">{{ material_count if material_count else "..." }}</td>
+              <td><a class="text-link" href="{{ nav_url('/courses/' ~ course.id) }}">{{ t("actions.open") }}</a></td>
+            </tr>
+            {% if group.sections %}
+              <tr class="section-expander-row">
+                <td colspan="6">
+                  <details class="section-expander">
+                    <summary>{{ "Show" if lang == "en" else "展开" }} {{ group.sections|length }} {{ "other section" if group.sections|length == 1 and lang == "en" else "other sections" if lang == "en" else "个其他班级" }}</summary>
+                    <div class="section-list">
+                      {% for section in group.sections %}
+                        <a class="section-chip" href="{{ nav_url('/courses/' ~ section.id) }}">
+                          <span class="section-code">{{ ui.course_code(section) }}</span>
+                          <span>{{ section.instructor.full_name }}</span>
+                          {% set section_material_count = section.materials|length if section.materials|length else section.material_count_hint %}
+                          <span><span data-material-count data-course-id="{{ section.id }}" aria-live="polite">{{ section_material_count if section_material_count else "..." }}</span> {{ t("common.materials") }}</span>
+                        </a>
+                      {% endfor %}
+                    </div>
+                  </details>
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    {{ ui.empty_state("没有符合条件的课程。" if lang == "zh" else "No courses match these filters.", "请逐项减少筛选条件，或重置视图查看所有模拟已选课程。" if lang == "zh" else "Clear one filter at a time, or reset the view to show all enrolled mock courses.") }}
+  {% endif %}
+</section>
+{% endblock %}

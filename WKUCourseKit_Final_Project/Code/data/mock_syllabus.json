@@ -1,0 +1,429 @@
+{
+  "student_key": "demo-student",
+  "terms": [
+    {
+      "code": "2026SP",
+      "name": "Spring 2026",
+      "starts_on": "2026-01-20",
+      "ends_on": "2026-05-14",
+      "courses": [
+        {
+          "subject": "CPS",
+          "course_number": "3320",
+          "section": "W01",
+          "title": "Python Software Development",
+          "campus": "Wenzhou-Kean University",
+          "instructor": {
+            "full_name": "Dr. Linnea Vos",
+            "email": "lvos@kean.edu",
+            "department": "Computer Science",
+            "office": "GEH C305"
+          },
+          "syllabus": {
+            "source_label": "Mock Simple Syllabus",
+            "status": "not_reviewed",
+            "updated_at": "2026-01-18T09:40:00",
+            "summary": "Project-based Python course covering web services, persistence, testing, and readable engineering documentation.",
+            "sections": [
+              {
+                "heading": "Course Description",
+              "body": "Students build maintainable Python applications with web routes, relational data models, templates, and clear verification steps. The final project emphasizes practical design decisions and defensible tradeoffs.",
+                "sort_order": 10
+              },
+              {
+                "heading": "Major Assignments",
+                "body": "Weekly labs, two code reviews, one data-layer checkpoint, one interface checkpoint, and a final deployed demo with tests and setup documentation.",
+                "sort_order": 20
+              },
+              {
+                "heading": "Grading Policy",
+                "body": "Labs 30%, checkpoints 20%, final project 35%, participation and code review 15%. Late work uses the course grace-token policy documented in class.",
+                "sort_order": 30
+              },
+              {
+                "heading": "Technology Expectations",
+              "body": "Students should use Python 3.12, virtual environments, Git, SQLite, and server-rendered templates unless an assignment explicitly authorizes another stack.",
+                "sort_order": 40
+              }
+            ]
+          },
+          "materials": [
+            {
+              "title": "Python Crash Course",
+              "authors": "Eric Matthes",
+              "material_type": "textbook",
+              "isbn_10": "1718502702",
+              "isbn_13": "9781718502703",
+              "edition": "3rd",
+              "publisher": "No Starch Press",
+              "requirement_status": "required",
+              "student_status": "owned",
+              "note": "Used for early syntax and testing review.",
+              "legal_search_url": "https://www.worldcat.org/isbn/9781718502703",
+              "library_search_url": "https://kean-primo.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,9781718502703",
+              "bookstore_search_url": "https://bncvirtual.com/kean"
+            },
+            {
+              "title": "Fluent Python",
+              "authors": "Luciano Ramalho",
+              "material_type": "textbook",
+              "isbn_10": "1492056359",
+              "isbn_13": "9781492056355",
+              "edition": "2nd",
+              "publisher": "O'Reilly Media",
+              "requirement_status": "optional",
+              "student_status": "needed",
+              "note": "Recommended for students who want deeper Python idioms.",
+              "legal_search_url": "https://www.worldcat.org/isbn/9781492056355",
+              "library_search_url": "https://kean-primo.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,9781492056355",
+              "bookstore_search_url": "https://bncvirtual.com/kean"
+            }
+          ]
+        },
+        {
+          "subject": "CPS",
+          "course_number": "2231",
+          "section": "W02",
+          "title": "Computer Programming",
+          "campus": "Wenzhou-Kean University",
+          "instructor": {
+            "full_name": "Prof. Amara Kessler",
+            "email": "akessler@kean.edu",
+            "department": "Computer Science",
+            "office": "GEH C318"
+          },
+          "syllabus": {
+            "source_label": "Mock Simple Syllabus",
+            "status": "reviewed",
+            "updated_at": "2026-01-12T14:15:00",
+            "summary": "Foundational programming course focused on algorithms, debugging, functions, collections, files, and programming habits.",
+            "sections": [
+              {
+                "heading": "Learning Outcomes",
+                "body": "Students will design small programs, trace control flow, use core data structures, write functions, and explain test cases in plain language.",
+                "sort_order": 10
+              },
+              {
+                "heading": "Lab Policy",
+                "body": "Labs are completed during scheduled sessions. Students may revise lab submissions within one week after feedback.",
+                "sort_order": 20
+              },
+              {
+                "heading": "Academic Integrity",
+                "body": "Students may discuss concepts, but submitted code must reflect individual work unless collaboration is explicitly assigned.",
+                "sort_order": 30
+              }
+            ]
+          },
+          "materials": [
+            {
+              "title": "Python Crash Course",
+              "authors": "Eric Matthes",
+              "material_type": "textbook",
+              "isbn_10": "1718502702",
+              "isbn_13": "9781718502703",
+              "edition": "3rd",
+              "publisher": "No Starch Press",
+              "requirement_status": "required",
+              "student_status": "owned",
+              "note": "Same required text as CPS 3320, reused across the programming sequence.",
+              "legal_search_url": "https://www.worldcat.org/isbn/9781718502703",
+              "library_search_url": "https://kean-primo.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,9781718502703",
+              "bookstore_search_url": "https://bncvirtual.com/kean"
+            }
+          ]
+        },
+        {
+          "subject": "ENG",
+          "course_number": "3090",
+          "section": "W04",
+          "title": "Business and Professional Writing",
+          "campus": "Wenzhou-Kean University",
+          "instructor": {
+            "full_name": "Dr. Priya Ellison",
+            "email": "pellison@kean.edu",
+            "department": "English",
+            "office": "CBPM B214"
+          },
+          "syllabus": {
+            "source_label": "Mock Simple Syllabus",
+            "status": "not_reviewed",
+            "updated_at": "2026-01-21T11:05:00",
+            "summary": "Professional communication course covering memos, reports, proposals, revision workflows, and audience analysis.",
+            "sections": [
+              {
+                "heading": "Writing Portfolio",
+                "body": "Students maintain a portfolio of drafts and revisions for workplace documents, including a final reflection on audience and tone decisions.",
+                "sort_order": 10
+              },
+              {
+                "heading": "Attendance",
+                "body": "Workshops depend on peer review. Students should notify the instructor before missing a workshop day.",
+                "sort_order": 20
+              }
+            ]
+          },
+          "materials": [
+            {
+              "title": "Technical Communication Today",
+              "authors": "Richard Johnson-Sheehan",
+              "material_type": "textbook",
+              "isbn_10": "0134425731",
+              "isbn_13": "9780134425733",
+              "edition": "6th",
+              "publisher": "Pearson",
+              "requirement_status": "required",
+              "student_status": "ordered",
+              "note": "Any legal rental, used, or library copy is acceptable.",
+              "legal_search_url": "https://www.worldcat.org/isbn/9780134425733",
+              "library_search_url": "https://kean-primo.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,9780134425733",
+              "bookstore_search_url": "https://bncvirtual.com/kean"
+            }
+          ]
+        },
+        {
+          "subject": "MATH",
+          "course_number": "2415",
+          "section": "W03",
+          "title": "Discrete Structures",
+          "campus": "Wenzhou-Kean University",
+          "instructor": {
+            "full_name": "Dr. Niko Marin",
+            "email": "nmarin@kean.edu",
+            "department": "Mathematical Sciences",
+            "office": "GEH B422"
+          },
+          "syllabus": {
+            "source_label": "Mock Simple Syllabus",
+            "status": "reviewed",
+            "updated_at": "2026-01-09T16:30:00",
+            "summary": "Discrete mathematics course for computing students, including proofs, sets, relations, counting, graphs, and recurrence relations.",
+            "sections": [
+              {
+                "heading": "Assessment",
+                "body": "Problem sets 35%, quizzes 15%, midterm 20%, final exam 25%, participation 5%. Students must show reasoning, not only final answers.",
+                "sort_order": 10
+              },
+              {
+                "heading": "Calculator and Software Policy",
+                "body": "Symbolic tools may be used for exploration after manual solutions are attempted. Exams are closed-book unless announced otherwise.",
+                "sort_order": 20
+              }
+            ]
+          },
+          "materials": [
+            {
+              "title": "Discrete Mathematics and Its Applications",
+              "authors": "Kenneth H. Rosen",
+              "material_type": "textbook",
+              "isbn_10": "125967651X",
+              "isbn_13": "9781259676512",
+              "edition": "8th",
+              "publisher": "McGraw Hill",
+              "requirement_status": "required",
+              "student_status": "needed",
+              "note": "Earlier editions may differ in exercise numbering.",
+              "legal_search_url": "https://www.worldcat.org/isbn/9781259676512",
+              "library_search_url": "https://kean-primo.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,9781259676512",
+              "bookstore_search_url": "https://bncvirtual.com/kean"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "2025FA",
+      "name": "Fall 2025",
+      "starts_on": "2025-09-02",
+      "ends_on": "2025-12-19",
+      "courses": [
+        {
+          "subject": "MGS",
+          "course_number": "3030",
+          "section": "W01",
+          "title": "Operations Management",
+          "campus": "Wenzhou-Kean University",
+          "instructor": {
+            "full_name": "Prof. Celeste Ruan",
+            "email": "cruan@kean.edu",
+            "department": "Management",
+            "office": "CBPM A311"
+          },
+          "syllabus": {
+            "source_label": "Mock Simple Syllabus",
+            "status": "archived",
+            "updated_at": "2025-08-29T10:20:00",
+            "summary": "Operations course covering process design, capacity, inventory, quality, forecasting, and supply chain tradeoffs.",
+            "sections": [
+              {
+                "heading": "Case Discussions",
+                "body": "Students prepare short decision memos before case days. Case work emphasizes operational evidence and clear recommendations.",
+                "sort_order": 10
+              },
+              {
+                "heading": "Team Project",
+                "body": "Teams analyze a service or production process and propose measurable improvements using course concepts.",
+                "sort_order": 20
+              }
+            ]
+          },
+          "materials": [
+            {
+              "title": "Operations Management",
+              "authors": "William J. Stevenson",
+              "material_type": "textbook",
+              "isbn_10": "126023889X",
+              "isbn_13": "9781260238891",
+              "edition": "14th",
+              "publisher": "McGraw Hill",
+              "requirement_status": "required",
+              "student_status": "borrowed",
+              "note": "Used for weekly problem sets and case background.",
+              "legal_search_url": "https://www.worldcat.org/isbn/9781260238891",
+              "library_search_url": "https://kean-primo.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,9781260238891",
+              "bookstore_search_url": "https://bncvirtual.com/kean"
+            }
+          ]
+        },
+        {
+          "subject": "COMM",
+          "course_number": "2500",
+          "section": "W05",
+          "title": "Public Speaking",
+          "campus": "Wenzhou-Kean University",
+          "instructor": {
+            "full_name": "Dr. Imani Vale",
+            "email": "ivale@kean.edu",
+            "department": "Communication",
+            "office": "GEH D117"
+          },
+          "syllabus": {
+            "source_label": "Mock Simple Syllabus",
+            "status": "archived",
+            "updated_at": "2025-09-05T08:55:00",
+            "summary": "Speech course focused on audience analysis, structure, delivery, evidence, and constructive peer feedback.",
+            "sections": [
+              {
+                "heading": "Speech Sequence",
+                "body": "Students deliver introductory, informative, persuasive, and special occasion speeches with outlines and reflection notes.",
+                "sort_order": 10
+              },
+              {
+                "heading": "Recording Policy",
+                "body": "Presentations may be recorded for self-review and grading. Recordings remain within the course environment.",
+                "sort_order": 20
+              }
+            ]
+          },
+          "materials": []
+        },
+        {
+          "subject": "ENG",
+          "course_number": "2403",
+          "section": "W02",
+          "title": "World Literature",
+          "campus": "Wenzhou-Kean University",
+          "instructor": {
+            "full_name": "Prof. Maren Sato",
+            "email": "msato@kean.edu",
+            "department": "English",
+            "office": "CBPM B207"
+          },
+          "syllabus": {
+            "source_label": "Mock Simple Syllabus",
+            "status": "archived",
+            "updated_at": "2025-09-11T13:25:00",
+            "summary": "Comparative literature course reading global short fiction, drama, and poetry with attention to translation, historical context, and close reading.",
+            "sections": [
+              {
+                "heading": "Reading Journal",
+                "body": "Students submit short reading notes before discussion days. Notes should quote one passage and ask one interpretive question.",
+                "sort_order": 10
+              },
+              {
+                "heading": "Essay Sequence",
+                "body": "Two analytical essays build from passage analysis to comparative argument. Revision memos are required with final drafts.",
+                "sort_order": 20
+              },
+              {
+                "heading": "Discussion Expectations",
+                "body": "Class sessions depend on prepared conversation. Students should bring the assigned text and annotate passages for discussion.",
+                "sort_order": 30
+              }
+            ]
+          },
+          "materials": [
+            {
+              "title": "The Norton Anthology of World Literature",
+              "authors": "Martin Puchner",
+              "material_type": "textbook",
+              "isbn_10": "0393265900",
+              "isbn_13": "9780393265903",
+              "edition": "4th",
+              "publisher": "W. W. Norton",
+              "requirement_status": "required",
+              "student_status": "borrowed",
+              "note": "Selected volumes are used across the semester.",
+              "legal_search_url": "https://www.worldcat.org/isbn/9780393265903",
+              "library_search_url": "https://kean-primo.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,9780393265903",
+              "bookstore_search_url": "https://bncvirtual.com/kean"
+            }
+          ]
+        },
+        {
+          "subject": "MATH",
+          "course_number": "1054",
+          "section": "W06",
+          "title": "Precalculus",
+          "campus": "Wenzhou-Kean University",
+          "instructor": {
+            "full_name": "Dr. Tomasz Hale",
+            "email": "thale@kean.edu",
+            "department": "Mathematical Sciences",
+            "office": "GEH B405"
+          },
+          "syllabus": {
+            "source_label": "Mock Simple Syllabus",
+            "status": "archived",
+            "updated_at": "2025-08-31T15:45:00",
+            "summary": "Precalculus course reviewing functions, trigonometry, exponential models, logarithms, and algebraic techniques for later calculus coursework.",
+            "sections": [
+              {
+                "heading": "Homework",
+                "body": "Problem practice is assigned weekly. Students should show intermediate work and review feedback before quizzes.",
+                "sort_order": 10
+              },
+              {
+                "heading": "Quiz Policy",
+                "body": "Short quizzes check recent skills and may include algebraic simplification, graph interpretation, and trigonometric identities.",
+                "sort_order": 20
+              },
+              {
+                "heading": "Placement Support",
+                "body": "Students who need additional review should attend office hours or math tutoring during the first three weeks.",
+                "sort_order": 30
+              }
+            ]
+          },
+          "materials": [
+            {
+              "title": "Precalculus: Mathematics for Calculus",
+              "authors": "James Stewart, Lothar Redlin, Saleem Watson",
+              "material_type": "textbook",
+              "isbn_10": "1305071751",
+              "isbn_13": "9781305071759",
+              "edition": "7th",
+              "publisher": "Cengage Learning",
+              "requirement_status": "optional",
+              "student_status": "needed",
+              "note": "Useful as a supplemental reference for practice problems.",
+              "legal_search_url": "https://www.worldcat.org/isbn/9781305071759",
+              "library_search_url": "https://kean-primo.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,9781305071759",
+              "bookstore_search_url": "https://bncvirtual.com/kean"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

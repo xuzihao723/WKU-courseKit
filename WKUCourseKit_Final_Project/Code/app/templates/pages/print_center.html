@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui with context %}
+
+{% block content %}
+<section class="page-header print-header" aria-labelledby="page-title">
+  <div>
+    <p class="eyebrow">{{ page_eyebrow }}</p>
+    <h1 id="page-title">{{ page_title }}</h1>
+    <p class="lede">{{ t("print.lede") }}</p>
+  </div>
+  <button class="button-primary print-button" type="button" onclick="window.print()">{{ t("actions.print_page") }}</button>
+</section>
+
+<form class="filter-bar no-print" method="get" action="/print">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  {{ ui.term_select(terms, filters.term) }}
+  <button class="button-primary" type="submit">{{ t("actions.build_packet") }}</button>
+  <a class="button-secondary" href="{{ nav_url('/print') }}">{{ t("actions.print_all_terms") }}</a>
+</form>
+
+<section class="print-packet" aria-labelledby="packet-title">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">{{ courses|length }} {{ "门课程" if lang == "zh" else "courses" }}</p>
+      <h2 id="packet-title">{{ t("print.packet_title") }}</h2>
+    </div>
+    <p class="print-note">{{ t("print.generated_note") }}</p>
+  </div>
+
+  {% if courses %}
+    {% for course in courses %}
+      <article class="print-course">
+        <header>
+          <p class="eyebrow">{{ course.term.name }}</p>
+          <h3>{{ ui.course_code(course) }} · {{ course.title }}</h3>
+          <p>{{ course.instructor.full_name }} · {{ course.instructor.email }}</p>
+        </header>
+        {% set packet_sections = course_detail_sections(course) %}
+        {% if packet_sections %}
+          {% for section in packet_sections %}
+            <section class="print-course-section">
+              <h4>{{ localized_section_heading(section, lang) }}</h4>
+              <div class="labeled-body">
+                {% for line in localized_labeled_body_lines(section.body, lang) %}
+                  {% if line.label %}
+                    <p><strong>{{ line.label }}:</strong> {{ line.value }}</p>
+                  {% elif line.value %}
+                    <p>{{ line.value }}</p>
+                  {% else %}
+                    <br>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </section>
+          {% endfor %}
+        {% else %}
+          <p>{{ "Class and instructor information is not available." if lang == "en" else "暂无课程和教师信息。" }}</p>
+        {% endif %}
+      </article>
+    {% endfor %}
+  {% else %}
+    {{ ui.empty_state(t("print.empty_title"), t("print.empty_body")) }}
+  {% endif %}
+</section>
+
+<section class="print-packet" aria-labelledby="checklist-title">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">{{ rows|length }} {{ "项" if lang == "zh" else "items" }}</p>
+      <h2 id="checklist-title">{{ t("print.checklist_title") }}</h2>
+    </div>
+  </div>
+  {% if rows %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ t("common.course") }}</th>
+            <th>{{ t("common.material") }}</th>
+            <th>{{ t("common.requirement") }}</th>
+            <th>{{ t("common.isbn") }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td>{{ ui.course_code(row.course) }}</td>
+              <td>{{ row.material.title }}</td>
+              <td>{{ ts(row.course_material.requirement_status) }}</td>
+              <td class="mono">{{ row.material.isbn_13 or row.material.isbn_10 or t("common.no_isbn") }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>{{ t("print.no_materials") }}</p>
+  {% endif %}
+</section>
+{% endblock %}

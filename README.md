@@ -255,6 +255,6 @@ No license file is currently provided. This repository does not declare an open-
 
 Repository maintainer: [@xuzihao723](https://github.com/xuzihao723).
 
-README organization is inspired by [awesome-readme](https://github.com/matiassingers/awesome-readme) and [Best-README-Template](https://github.com/othneildrew/Best-README-Template). Thanks to the maintainers of FastAPI, SQLAlchemy, Jinja2, HTTPX, and Playwright. University services and third-party material links remain the property of their respective providers.
+Thanks to the maintainers of FastAPI, SQLAlchemy, Jinja2, HTTPX, and Playwright. University services and third-party material links remain the property of their respective providers.
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
